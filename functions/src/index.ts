@@ -9,11 +9,14 @@ exports.createUserInFirestore = functions.auth.user().onCreate(async user => {
   // Adds document to users to stay up to date with auth
   const { uid, displayName, email, photoURL, phoneNumber } = user;
   const doc = {
-    uid,
+    __deleted: false,
+    id: uid,
     displayName,
+    description: "",
     email,
-    photoURL,
-    phoneNumber,
+    img: photoURL,
+    phone: phoneNumber,
+    services: []
   };
 
   // Create new user with the data retrieved and latest moments
