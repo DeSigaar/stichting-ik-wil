@@ -8,7 +8,7 @@ admin.initializeApp();
 exports.createUserInFirestore = functions.auth.user().onCreate(async user => {
   // Adds document to users to stay up to date with auth
   const { uid, displayName, email, photoURL, phoneNumber } = user;
-  let doc = {
+  const doc = {
     uid,
     displayName,
     email,
@@ -22,12 +22,8 @@ exports.createUserInFirestore = functions.auth.user().onCreate(async user => {
     .collection("users")
     .doc(uid)
     .set(doc)
-    .then(() => {
-      return console.log("User document created for " + uid + "!");
-    })
-    .catch(error => {
-      return console.log("Error adding user document for " + uid + ": " + error);
-    });
+    .then(() => console.log("User document created for " + uid + "!"))
+    .catch((error) => console.log("Error adding user document for " + uid + ": " + error));
 });
 
 // Function that fires when auth removes a user
@@ -41,10 +37,6 @@ exports.deleteUserInFirestore = functions.auth.user().onDelete(user => {
     .collection("users")
     .doc(uid)
     .delete()
-    .then(() => {
-      return console.log("User document deleted for " + uid + "!");
-    })
-    .catch(error => {
-      return console.error("Error removing user document for " + uid + ": " + error);
-    });
+    .then(() => console.log("User document deleted for " + uid + "!"))
+    .catch((error) => console.error("Error removing user document for " + uid + ": " + error));
 });
