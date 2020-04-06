@@ -8,10 +8,16 @@ admin.initializeApp();
 exports.createUserInFirestore = functions.auth.user().onCreate(async user => {
   // Adds document to users to stay up to date with auth
   const { uid, displayName, email, photoURL, phoneNumber } = user;
+  const displayNameArray = displayName?.split(" ")
+  const firstName = displayNameArray?.shift();
+  const lastName = displayNameArray?.join(" ");
+
   const doc = {
     __deleted: false,
     id: uid,
     displayName,
+    firstName,
+    lastName,
     description: "",
     email,
     img: photoURL,
