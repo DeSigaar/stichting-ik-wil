@@ -22,7 +22,8 @@ exports.createUserInFirestore = functions.auth.user().onCreate(async user => {
     email,
     img: photoURL,
     phone: phoneNumber,
-    services: []
+    services: [],
+    registrations: []
   };
 
   // Create new user with the data retrieved and latest moments
