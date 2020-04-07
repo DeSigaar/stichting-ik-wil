@@ -1,52 +1,131 @@
-import * as functions from 'firebase-functions';
+// import * as firebase from "firebase";
+import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
+import * as firebase_tools from "firebase-tools";
 
 // The Firebase Admin SDK to access the Firebase Cloud Firestore
 admin.initializeApp();
 
 // Function that fires when auth adds a user
-exports.createUserInFirestore = functions.auth.user().onCreate(async user => {
-  // Adds document to users to stay up to date with auth
-  const { uid, displayName, email, photoURL, phoneNumber } = user;
-  const displayNameArray = displayName?.split(" ")
-  const firstName = displayNameArray?.shift();
-  const lastName = displayNameArray?.join(" ");
+exports.createUserInFirestore = functions.auth.user().onCreate(async (user) => {
+	// Adds document to users to stay up to date with auth
+	const { uid, displayName, email, photoURL, phoneNumber } = user;
 
-  const doc = {
-    __deleted: false,
-    id: uid,
-    displayName,
-    firstName,
-    lastName,
-    description: "",
-    email,
-    img: photoURL,
-    phone: phoneNumber,
-    services: [],
-    registrations: []
-  };
+	const doc = {
+		__deleted: false,
+		id: uid,
+		displayName,
+		description: null,
+		email,
+		img: photoURL,
+		phone: phoneNumber,
+		pushToken: null
+	};
 
-  // Create new user with the data retrieved and latest moments
-  await admin
-    .firestore()
-    .collection("users")
-    .doc(uid)
-    .set(doc)
-    .then(() => console.log("User document created for " + uid + "!"))
-    .catch((error) => console.log("Error adding user document for " + uid + ": " + error));
+	// Create new user with the data retrieved and latest moments
+	await admin
+		.firestore()
+		.collection("users")
+		.doc(uid)
+		.set(doc)
+		.then(() => console.log(`User document created for ${uid}`))
+		.catch((error) =>
+			console.log(`Error adding user document for ${uid}: ${error}`)
+		);
 });
 
 // Function that fires when auth removes a user
-exports.deleteUserInFirestore = functions.auth.user().onDelete(user => {
-  // Removes document from users to stay up to date with auth
-  const { uid } = user;
+exports.deleteUserInFirestore = functions.auth.user().onDelete(async (user) => {
+	// Removes document from users to stay up to date with auth
+	const { uid } = user;
 
-  // Remove the document selected by user ID
-  return admin
-    .firestore()
-    .collection("users")
-    .doc(uid)
-    .delete()
-    .then(() => console.log("User document deleted for " + uid + "!"))
-    .catch((error) => console.error("Error removing user document for " + uid + ": " + error));
+	// Remove the document selected by user ID
+	await admin
+		.firestore()
+		.collection("users")
+		.doc(uid)
+		.delete()
+		.then(async () => console.log(`User document deleted for ${uid}`))
+		.catch((error) =>
+			console.error(`Error removing user document for ${uid}: ${error}`)
+		);
 });
+
+// Function that fires when firestore collection activities are created
+exports.activityCreate = functions.firestore
+	.document("activities/{activityID}")
+	.onCreate((change, context) => {
+		console.log(context.params.activityID, change, context);
+	});
+
+// Function that fires when firestore collection activities are updated
+exports.activityUpdate = functions.firestore
+	.document("activities/{activityID}")
+	.onUpdate((change, context) => {
+		console.log(context.params.activityID, change, context);
+	});
+
+// Function that fires when firestore collection activities are deleted
+exports.activityDelete = functions.firestore
+	.document("activities/{activityID}")
+	.onDelete((change, context) => {
+		console.log(context.params.activityID, change, context);
+	});
+
+// firebase messaging:
+// Authorization = AAAACCaHSxk:APA91bGgxmfCjIMF9eRPZyc9XyY6A9ocdLQlB1SfArdYKu2zqLxahQz4d7s_fGePSDYFDuGHJkzq1FTb4b7ffzRiUbd1Bfpe12d3fkL2qu6QQYSlu6PgPt7FwTN90TiI74kQa7fO9yCg
+// {
+// 	"data": {
+// 			"title": "Max is de beste",
+// 			"body": "Hierbij wil ik verklaren dat Max de beste is!! Bron: https://ikwil-app.web.app/",
+// 			"sound": "default",
+// 			"badge": "1",
+// 			"icon": "https://ikwil-app.web.app/icons/android-chrome-48x48.png",
+// 			"click_action": "https://ikwil-app.web.app/",
+// 			"subtitle": "Nogmaals: de beste",
+// 			"body_loc_key": "",
+// 			"body_loc_args": "",
+// 			"title_loc_key": "",
+// 			"title_loc_args": "",
+// 			"android_channel_id": "",
+// 			"tag": "",
+// 			"color": "#F38C00"
+// 	},
+// 	"to": "",
+// 	"condition": "",
+// 	"registration_ids": ["f2sBWX05YBoV9enKhwPLup:APA91bFwKni58wOX_j4xCEodzj6y70_zH6RCj1EZcg4H85ws5T_XtQoxonei1NdBXXki4DIzrwia2RzsbeDLrJe2wivEzPUzDBBAzs9jZHPJBOBxSrttcdEc1Nm3_xEJ23XAFobQESJr"],
+// 	"collapse_key": "",
+// 	"priority": "normal",
+// 	"content_available": false,
+// 	"mutable_content": false,
+// 	"time_to_live": 4,
+// 	"restricted_package_name": "",
+// 	"dry_run": false
+// }
+
+
+///////////
+// UTILS //
+///////////
+// Delete collection
+exports.deleteCollection = functions
+	.runWith({ timeoutSeconds: 540, memory: "2GB" })
+	.https.onCall((data, context) => {
+		if (!(context.auth && context.auth.token && context.auth.token.admin)) {
+			throw new functions.https.HttpsError(
+				"permission-denied",
+				"Must be an administrative user to initiate delete."
+			);
+		}
+
+		const path = data.path;
+
+		return firebase_tools.firestore
+			.delete(path, {
+				project: process.env.GCLOUD_PROJECT,
+				token: functions.config().ci.token,
+				recursive: true,
+				yes: true,
+			})
+			.then(() => console.log(`Deleted ${path}`));
+	});
