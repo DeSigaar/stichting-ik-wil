@@ -1,7 +1,5 @@
-// import * as firebase from "firebase";
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
-// import * as firebase_tools from "firebase-tools";
 
 // The Firebase Admin SDK to access the Firebase Cloud Firestore
 admin.initializeApp();
@@ -74,34 +72,19 @@ exports.deleteUserInFirestore = functions.auth.user().onDelete(async (user) => {
 		);
 });
 
-// Function that fires when firestore collection activities are updated
-exports.activityUpdate = functions.firestore
+// Function that fires when firestore collection activities are deleted
+exports.activityDelete = functions.firestore
 	.document("activities/{activityID}")
-	.onUpdate(async (change, context) => {
+	.onDelete(async (__change, context) => {
 		const { activityID } = context.params;
-		const { before, after } = change;
-
-		console.log(before, after);
-		console.log(activityID, context);
 
 		await admin
 			.firestore()
 			.collectionGroup("registrations")
 			.where("activity", "==", `activities/${activityID}`)
 			.get()
-			.then((querySnapshot) =>
-				querySnapshot.forEach((doc) => {
-					console.log(doc);
-				})
-			)
+			.then((querySnapshot) => querySnapshot.forEach((doc) => doc.ref.delete()))
 			.catch((error) => console.error(error));
-	});
-
-// Function that fires when firestore collection activities are deleted
-exports.activityDelete = functions.firestore
-	.document("activities/{activityID}")
-	.onDelete((change, context) => {
-		console.log(context.params.activityID, change, context);
 	});
 
 // Function that fires when firestore collection users are created
@@ -174,28 +157,6 @@ exports.registrationDelete = functions.firestore
 ///////////
 // UTILS //
 ///////////
-// Delete collection
-// exports.deleteCollection = functions
-// 	.runWith({ timeoutSeconds: 540, memory: "2GB" })
-// 	.https.onCall((data, context) => {
-// 		if (!(context.auth && context.auth.token && context.auth.token.admin)) {
-// 			throw new functions.https.HttpsError(
-// 				"permission-denied",
-// 				"Must be an administrative user to initiate delete."
-// 			);
-// 		}
-
-// 		const path = data.path;
-
-// 		return firebase_tools.firestore
-// 			.delete(path, {
-// 				project: process.env.GCLOUD_PROJECT,
-// 				token: functions.config().ci.token,
-// 				recursive: true,
-// 				yes: true,
-// 			})
-// 			.then(() => console.log(`Deleted ${path}`));
-// 	});
 
 exports.sendNotification = functions
 	.runWith({ timeoutSeconds: 540, memory: "2GB" })
