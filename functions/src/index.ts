@@ -1,7 +1,7 @@
 // import * as firebase from "firebase";
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
-import * as firebase_tools from "firebase-tools";
+// import * as firebase_tools from "firebase-tools";
 
 // The Firebase Admin SDK to access the Firebase Cloud Firestore
 admin.initializeApp();
@@ -19,7 +19,7 @@ exports.createUserInFirestore = functions.auth.user().onCreate(async (user) => {
 		email,
 		img: photoURL,
 		phone: phoneNumber,
-		pushToken: null
+		pushToken: null,
 	};
 
 	// Create new user with the data retrieved and latest moments
@@ -45,24 +45,56 @@ exports.deleteUserInFirestore = functions.auth.user().onDelete(async (user) => {
 		.collection("users")
 		.doc(uid)
 		.delete()
-		.then(async () => console.log(`User document deleted for ${uid}`))
+		.then(
+			async () =>
+				await admin
+					.firestore()
+					.collection("users")
+					.doc(uid)
+					.collection("registrations")
+					.listDocuments()
+					.then(
+						async (data) =>
+							await Promise.all(
+								data.map((_registration) => _registration.delete())
+							)
+								.then(() => console.log(`User document deleted for ${uid}`))
+								.catch((error) =>
+									console.error(
+										`Error removing user document for ${uid}: ${error}`
+									)
+								)
+					)
+					.catch((error) =>
+						console.error(`Error removing user document for ${uid}: ${error}`)
+					)
+		)
 		.catch((error) =>
 			console.error(`Error removing user document for ${uid}: ${error}`)
 		);
 });
 
-// Function that fires when firestore collection activities are created
-exports.activityCreate = functions.firestore
-	.document("activities/{activityID}")
-	.onCreate((change, context) => {
-		console.log(context.params.activityID, change, context);
-	});
-
 // Function that fires when firestore collection activities are updated
 exports.activityUpdate = functions.firestore
 	.document("activities/{activityID}")
-	.onUpdate((change, context) => {
-		console.log(context.params.activityID, change, context);
+	.onUpdate(async (change, context) => {
+		const { activityID } = context.params;
+		const { before, after } = change;
+
+		console.log(before, after);
+		console.log(activityID, context);
+
+		await admin
+			.firestore()
+			.collectionGroup("registrations")
+			.where("activity", "==", `activities/${activityID}`)
+			.get()
+			.then((querySnapshot) =>
+				querySnapshot.forEach((doc) => {
+					console.log(doc);
+				})
+			)
+			.catch((error) => console.error(error));
 	});
 
 // Function that fires when firestore collection activities are deleted
@@ -70,6 +102,42 @@ exports.activityDelete = functions.firestore
 	.document("activities/{activityID}")
 	.onDelete((change, context) => {
 		console.log(context.params.activityID, change, context);
+	});
+
+// Function that fires when firestore collection users are created
+exports.registrationCreate = functions.firestore
+	.document("users/{userID}/registrations/{registrationID}")
+	.onCreate((change, context) => {
+		console.log(
+			context.params.userID,
+			context.params.registrationID,
+			change,
+			context
+		);
+	});
+
+// Function that fires when firestore collection users are updated
+exports.registrationUpdate = functions.firestore
+	.document("users/{userID}/registrations/{registrationID}")
+	.onUpdate((change, context) => {
+		console.log(
+			context.params.userID,
+			context.params.registrationID,
+			change,
+			context
+		);
+	});
+
+// Function that fires when firestore collection users are deleted
+exports.registrationDelete = functions.firestore
+	.document("users/{userID}/registrations/{registrationID}")
+	.onDelete((change, context) => {
+		console.log(
+			context.params.userID,
+			context.params.registrationID,
+			change,
+			context
+		);
 	});
 
 // firebase messaging:
@@ -103,29 +171,34 @@ exports.activityDelete = functions.firestore
 // 	"dry_run": false
 // }
 
-
 ///////////
 // UTILS //
 ///////////
 // Delete collection
-exports.deleteCollection = functions
+// exports.deleteCollection = functions
+// 	.runWith({ timeoutSeconds: 540, memory: "2GB" })
+// 	.https.onCall((data, context) => {
+// 		if (!(context.auth && context.auth.token && context.auth.token.admin)) {
+// 			throw new functions.https.HttpsError(
+// 				"permission-denied",
+// 				"Must be an administrative user to initiate delete."
+// 			);
+// 		}
+
+// 		const path = data.path;
+
+// 		return firebase_tools.firestore
+// 			.delete(path, {
+// 				project: process.env.GCLOUD_PROJECT,
+// 				token: functions.config().ci.token,
+// 				recursive: true,
+// 				yes: true,
+// 			})
+// 			.then(() => console.log(`Deleted ${path}`));
+// 	});
+
+exports.sendNotification = functions
 	.runWith({ timeoutSeconds: 540, memory: "2GB" })
 	.https.onCall((data, context) => {
-		if (!(context.auth && context.auth.token && context.auth.token.admin)) {
-			throw new functions.https.HttpsError(
-				"permission-denied",
-				"Must be an administrative user to initiate delete."
-			);
-		}
-
-		const path = data.path;
-
-		return firebase_tools.firestore
-			.delete(path, {
-				project: process.env.GCLOUD_PROJECT,
-				token: functions.config().ci.token,
-				recursive: true,
-				yes: true,
-			})
-			.then(() => console.log(`Deleted ${path}`));
+		console.log("Sending notification");
 	});
