@@ -36,6 +36,18 @@
 				font-weight: 300;
 				color: rgba(0, 0, 0, 0.6);
 				margin: 0 0 16px;
+				display: flex;
+				justify-content: center;
+			}
+			#message h1 span:nth-child(1),
+			#message h1 span:nth-child(3) {
+				width: 200px;
+			}
+			#message h1 span:nth-child(1) {
+				text-align: right;
+			}
+			#message h1 span:nth-child(2) {
+				margin: 0 25px;
 				text-align: center;
 			}
 			#message p {
@@ -63,6 +75,16 @@
 				text-align: center;
 				font-size: 13px;
 			}
+			.images {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+			.images img {
+				height: 50px;
+				margin: 0 60px 10px;
+			}
+
 			@media (max-width: 600px) {
 				body,
 				#message {
@@ -78,7 +100,20 @@
 	</head>
 	<body>
 		<div id="message" role="presentation">
-			<h1>Stichting Ik Wil x De Sigaar</h1>
+			<div class="images" role="presentation">
+				<img
+					src="https://ikwil-app.web.app/icons/android-chrome-192x192.png"
+					alt="Stichting Ik Wil"
+				/>
+				<img
+					src="http://desigaar.com/static/DeSigaar-Sigaar-2b9badb6812402e9c6346380f7d5ac84.svg"
+					alt="De Sigaar"
+				/>
+			</div>
+			<h1>
+				<span>Stichting Ik Wil</span><span> x </span><span>De Sigaar</span>
+			</h1>
+
 			<p>
 				Hieronder is alles te vinden dat te maken heeft met Stichting Ik Wil en
 				De Sigaar.
