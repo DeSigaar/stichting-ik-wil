@@ -1,11 +1,11 @@
 # Stichting Ik Wil by De Sigaar ![De Sigaar Logo](https://i.gyazo.com/2139de3348632e93be61757115a7e395.png)
 
-[![Deploy](https://github.com/de-sigaar/stichting-ik-wil/workflows/Deploy/badge.svg)](https://github.com/de-sigaar/stichting-ik-wil/actions?query=workflow%3A%22Deploy%22)
+[![Deploy](https://github.com/DeSigaar/stichting-ik-wil/workflows/Deploy/badge.svg)](https://github.com/DeSigaar/stichting-ik-wil/actions?query=workflow%3A%22Deploy%22)
 [![Website](https://img.shields.io/website?down_color=red&down_message=offline&up_color=green&up_message=online&url=https%3A%2F%2Fstichting-ik-wil.web.app%2F)](https://stichting-ik-wil.web.app/)
-[![Watchers](https://img.shields.io/github/watchers/de-sigaar/stichting-ik-wil)](https://github.com/de-sigaar/stichting-ik-wil/watchers)
-[![Stars](https://img.shields.io/github/stars/de-sigaar/stichting-ik-wil)](https://github.com/de-sigaar/stichting-ik-wil/stargazers)
-[![Issues](https://img.shields.io/github/issues/de-sigaar/stichting-ik-wil)](https://github.com/de-sigaar/stichting-ik-wil/issues)
-[![Pull requests](https://img.shields.io/github/issues-pr/de-sigaar/stichting-ik-wil)](https://github.com/de-sigaar/stichting-ik-wil/pulls)
+[![Watchers](https://img.shields.io/github/watchers/DeSigaar/stichting-ik-wil)](https://github.com/DeSigaar/stichting-ik-wil/watchers)
+[![Stars](https://img.shields.io/github/stars/DeSigaar/stichting-ik-wil)](https://github.com/DeSigaar/stichting-ik-wil/stargazers)
+[![Issues](https://img.shields.io/github/issues/DeSigaar/stichting-ik-wil)](https://github.com/DeSigaar/stichting-ik-wil/issues)
+[![Pull requests](https://img.shields.io/github/issues-pr/DeSigaar/stichting-ik-wil)](https://github.com/DeSigaar/stichting-ik-wil/pulls)
 
 ## Table of Contents
 
@@ -34,7 +34,7 @@ Make sure you have Node.js installed. If you are unsure if node is installed, ru
 Clone this repository to your local machine and move to the new folder.
 
 ```
-$ git clone https://github.com/de-sigaar/stichting-ik-wil.git
+$ git clone https://github.com/DeSigaar/stichting-ik-wil.git
 $ cd stichting-ik-wil
 ```
 
@@ -50,4 +50,4 @@ $ cd functions && npm install
 
 - [Max Altena](https://github.com/MaxAltena)
 
-See the whole list of [contributors](https://github.com/de-sigaar/stichting-ik-wil/contributors) who participated in this project.
+See the whole list of [contributors](https://github.com/DeSigaar/stichting-ik-wil/contributors) who participated in this project.
